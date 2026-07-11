@@ -9,6 +9,7 @@ import {
 import { getFaq, findBestMatch } from "../faq.js";
 import { config } from "../config.js";
 import { logger } from "../logger.js";
+import { logCommandEvent } from "../status-reporter.js";
 
 const MATCH_THRESHOLD = 0.34;
 const ACCENT_COLOR = 0xf5a623;
@@ -76,7 +77,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const match = findBestMatch(faq.entries, question);
-  if (!match || match.score < MATCH_THRESHOLD) {
+  const matched = !!match && match.score >= MATCH_THRESHOLD;
+  logCommandEvent(question, matched, match?.score ?? null);
+
+  if (!matched) {
     const embed = new EmbedBuilder()
       .setColor(ACCENT_COLOR)
       .setTitle("Not sure I have that one")

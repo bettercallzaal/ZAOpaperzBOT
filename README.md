@@ -85,6 +85,23 @@ systemctl --user enable --now zaopaperz.service
 journalctl --user -u zaopaperz -f
 ```
 
+## Status dashboard
+
+`dashboard/` is a separate Next.js app (its own `package.json`, deployed to
+Vercel independently of the bot process) that shows whether the bot is
+online, how many Discord servers it's installed in, FAQ cache freshness,
+and a recent-activity feed of `/zao` questions.
+
+The bot and dashboard never talk to each other directly - the bot writes
+heartbeats (every 5 min) and command events (per `/zao` call) into the
+`bot_heartbeats`/`bot_events` Supabase tables (same project other ZAO bots
+report into), and the dashboard reads from there. Setting `SUPABASE_URL`/
+`SUPABASE_SERVICE_ROLE_KEY` in the bot's `.env` is optional - without them,
+the bot runs exactly as before and the dashboard just shows "status
+unknown".
+
+To run the dashboard locally: `cd dashboard && npm install && npm run dev`.
+
 ## Extending it
 
 - More commands: add a file under `src/commands/`, export `data` (a

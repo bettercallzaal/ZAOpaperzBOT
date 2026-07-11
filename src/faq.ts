@@ -105,6 +105,11 @@ export async function getFaq(): Promise<FaqCache> {
   return cache;
 }
 
+/** Minutes since the FAQ cache was last successfully fetched, or null if it's never been fetched. */
+export function getFaqCacheAgeMinutes(): number | null {
+  return cache ? (Date.now() - cache.fetchedAt) / 60000 : null;
+}
+
 /** Compute document frequency (how many entries contain each token). */
 function computeDocumentFrequencies(entries: FaqEntry[]): Map<string, number> {
   const df = new Map<string, number>();
