@@ -42,7 +42,7 @@ src/status-reporter.ts (NEW)
 dashboard/ (NEW, separate Next.js app in the same repo)
         |
         v
-dashboard/lib/supabase.ts --reads (read-only, publishable key)--> public.bot_heartbeats, public.bot_events
+dashboard/lib/supabase.ts --reads (server-side only, service-role key)--> public.bot_heartbeats, public.bot_events
         |
         v
 dashboard/app/page.tsx renders:
@@ -56,10 +56,10 @@ The bot and dashboard never talk to each other directly - they only share the Su
 
 ## Components
 
-- `src/status-reporter.ts` (new) - exports `startHeartbeatLoop()` (called once from `src/index.ts` on startup) and `logCommandEvent(question, matched, score)` (called from `src/commands/zao.ts` after each match attempt). Uses `@supabase/supabase-js` with a service-role-free anon key restricted to insert/upsert on these two tables (existing RLS policies apply - if they don't currently allow bot-authenticated writes, that's a small policy addition, not a new table).
+- `src/status-reporter.ts` (new) - exports `startHeartbeatLoop()` (called once from `src/index.ts` on startup) and `logCommandEvent(question, matched, score)` (called from `src/commands/zao.ts` after each match attempt). Uses `@supabase/supabase-js` with the service-role key (confirmed 2026-07-11: `bot_heartbeats`/`bot_events` have RLS enabled with zero policies defined, i.e. default-deny for anon/authenticated - the other bots writing to these tables are necessarily using the service-role key, which bypasses RLS). No new RLS policy needed.
 - `dashboard/` (new) - a minimal Next.js 14 App Router project:
   - `dashboard/app/page.tsx` - the single status page, server component, queries Supabase at request time (no client-side fetch needed for this simple a page)
-  - `dashboard/lib/supabase.ts` - thin read-only client using `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `dashboard/lib/supabase.ts` - thin client using the service-role key, imported only from server components/route handlers - never exposed to the browser (no `NEXT_PUBLIC_` prefix on the key)
   - `dashboard/package.json` - separate from the bot's root `package.json` (different runtime concerns: bot is a long-running process, dashboard is a Next.js build)
 
 ## Data flow
@@ -83,9 +83,8 @@ The bot and dashboard never talk to each other directly - they only share the Su
 
 - Vercel project settings: Root Directory must be changed from repo root to `dashboard/`, and Framework Preset from "Other" to "Next.js". This is a one-time manual change in the Vercel project's own settings UI - not scriptable from this environment (no `vercel` CLI/token configured here).
 - New env vars needed in two places:
-  - Bot's `.env` on the VPS (187.77.3.104): `SUPABASE_URL`, `SUPABASE_ANON_KEY` (or a scoped key if the write policy needs one) - added via the `setting-secrets` flow, not pasted in chat.
-  - Vercel project env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable key - safe to expose client-side, read-only RLS enforces the boundary).
-- If `bot_heartbeats`/`bot_events` RLS policies don't currently permit inserts from an anon-key-authenticated bot process, that policy needs a small addition scoped to `bot='zaopaperz'` (or matching whatever pattern the other bots already use - check their policies first rather than inventing a new one).
+  - Bot's `.env` on the VPS (187.77.3.104): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` - added via the `setting-secrets` flow, not pasted in chat.
+  - Vercel project env vars: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (server-only - do NOT prefix with `NEXT_PUBLIC_`, since this key must never reach the browser bundle; only server components/route handlers read it).
 
 ## Follow-up (out of scope here, tracked separately)
 
