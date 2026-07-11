@@ -26,11 +26,13 @@ describe("buildCommandEventPayload", () => {
     assert.equal(payload.message, "who founded the zao");
     assert.equal(payload.meta.matched, true);
     assert.equal(payload.meta.score, 0.82);
+    assert.ok(!Number.isNaN(new Date(payload.ts).getTime()), "ts should be a valid ISO timestamp");
   });
 
   test("truncates questions longer than 200 characters", () => {
     const longQuestion = "a".repeat(250);
     const payload = buildCommandEventPayload(longQuestion, false, null);
     assert.equal(payload.message.length, 200);
+    assert.ok(!Number.isNaN(new Date(payload.ts).getTime()), "ts should be a valid ISO timestamp");
   });
 });

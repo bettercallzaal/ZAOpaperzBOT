@@ -16,6 +16,7 @@ export interface CommandEventPayload {
   bot: string;
   kind: string;
   message: string;
+  ts: string;
   meta: { matched: boolean; score: number | null };
 }
 
@@ -40,6 +41,7 @@ export function buildCommandEventPayload(
     bot: BOT_NAME,
     kind: "command",
     message: question.length > MAX_MESSAGE_LENGTH ? question.slice(0, MAX_MESSAGE_LENGTH) : question,
+    ts: new Date().toISOString(),
     meta: { matched, score },
   };
 }
