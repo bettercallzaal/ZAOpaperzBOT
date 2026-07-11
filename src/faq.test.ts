@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { findBestMatch, type FaqEntry } from "./faq.js";
+import { findBestMatch, getFaqCacheAgeMinutes, type FaqEntry } from "./faq.js";
 
 const ENTRIES: FaqEntry[] = [
   { question: "What is The ZAO?", answer: "A decentralized impact network." },
@@ -48,5 +48,13 @@ describe("findBestMatch", () => {
   test("empty entries list never throws", () => {
     const result = findBestMatch([], "what is the zao");
     assert.equal(result, null);
+  });
+});
+
+describe("getFaqCacheAgeMinutes", () => {
+  test("returns null before any fetch has happened", () => {
+    // This only holds if no earlier test in this file calls getFaq() and
+    // populates the module-level cache - none of the existing tests do.
+    assert.equal(getFaqCacheAgeMinutes(), null);
   });
 });

@@ -2,11 +2,14 @@ import { Client, GatewayIntentBits, Events, type Interaction } from "discord.js"
 import { config } from "./config.js";
 import { logger } from "./logger.js";
 import * as zaoCommand from "./commands/zao.js";
+import { startHeartbeatLoop } from "./status-reporter.js";
+import { getFaqCacheAgeMinutes } from "./faq.js";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once(Events.ClientReady, (c) => {
   logger.info({ tag: c.user.tag, guilds: c.guilds.cache.size }, "ZAO Paperz bot ready");
+  startHeartbeatLoop(() => c.guilds.cache.size, getFaqCacheAgeMinutes);
 });
 
 client.on(Events.InteractionCreate, async (interaction: Interaction) => {
