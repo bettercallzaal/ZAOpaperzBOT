@@ -61,7 +61,7 @@ function getClient(): SupabaseClient | null {
   return client;
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Supabase call timed out")), ms)),
@@ -78,7 +78,7 @@ export function startHeartbeatLoop(
     try {
       const payload = buildHeartbeatPayload(getGuildCount(), getFaqCacheAgeMinutes());
       const { error } = await withTimeout(
-        supabase.from("bot_heartbeats").upsert(payload, { onConflict: "bot" }).select() as unknown as Promise<{ error: null | { message: string } }>,
+        supabase.from("bot_heartbeats").upsert(payload, { onConflict: "bot" }),
         SUPABASE_TIMEOUT_MS,
       );
       if (error) throw error;
@@ -94,7 +94,7 @@ export function logCommandEvent(question: string, matched: boolean, score: numbe
   const supabase = getClient();
   if (!supabase) return;
   const payload = buildCommandEventPayload(question, matched, score);
-  void withTimeout(supabase.from("bot_events").insert(payload).select() as unknown as Promise<unknown>, SUPABASE_TIMEOUT_MS).catch((err) => {
+  void withTimeout(supabase.from("bot_events").insert(payload), SUPABASE_TIMEOUT_MS).catch((err) => {
     logger.warn({ err }, "Command event write failed");
   });
 }
