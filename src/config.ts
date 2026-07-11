@@ -13,4 +13,6 @@ export const config = {
   faqUrl: process.env.ZAO_FAQ_URL || "https://www.thezao.xyz/what-is-the-zao",
   faqRefreshMinutes: Number(process.env.FAQ_REFRESH_MINUTES || "360"),
   logLevel: process.env.LOG_LEVEL || "info",
+  supabaseUrl: process.env.SUPABASE_URL || undefined,
+  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || undefined,
 };
