@@ -20,13 +20,27 @@ const STOPWORDS = new Set([
   "its", "that", "this", "with", "as", "at", "be", "can", "i", "you",
 ]);
 
+const SYNONYM_MAP: Record<string, string> = {
+  "started": "founded",
+  "create": "founded",
+  "chain": "blockchain",
+  "chains": "blockchain",
+  "join": "member",
+  "company": "label",
+};
+
+function normalizeToken(token: string): string {
+  return SYNONYM_MAP[token] || token;
+}
+
 function tokenize(text: string): Set<string> {
   return new Set(
     text
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, " ")
       .split(/\s+/)
-      .filter((w) => w.length > 1 && !STOPWORDS.has(w)),
+      .filter((w) => w.length > 1 && !STOPWORDS.has(w))
+      .map((w) => normalizeToken(w)),
   );
 }
 
@@ -91,7 +105,25 @@ export async function getFaq(): Promise<FaqCache> {
   return cache;
 }
 
-/** Simple keyword-overlap match - no LLM call, so this responds instantly. */
+/** Compute document frequency (how many entries contain each token). */
+function computeDocumentFrequencies(entries: FaqEntry[]): Map<string, number> {
+  const df = new Map<string, number>();
+  for (const entry of entries) {
+    const tokens = tokenize(entry.question);
+    for (const token of tokens) {
+      df.set(token, (df.get(token) ?? 0) + 1);
+    }
+  }
+  return df;
+}
+
+/** Compute IDF for a token: ln((N+1)/(df(t)+1)) + 1 */
+function computeIdf(token: string, totalDocs: number, df: Map<string, number>): number {
+  const docFreq = df.get(token) ?? 0;
+  return Math.log((totalDocs + 1) / (docFreq + 1)) + 1;
+}
+
+/** IDF-weighted keyword match - no LLM call, so this responds instantly. */
 export function findBestMatch(
   entries: FaqEntry[],
   query: string,
@@ -99,12 +131,32 @@ export function findBestMatch(
   const queryTokens = tokenize(query);
   if (queryTokens.size === 0) return null;
 
+  if (entries.length === 0) return null;
+
+  // Compute document frequencies from all FAQ entries
+  const df = computeDocumentFrequencies(entries);
+
+  // Compute IDF scores for query tokens
+  const queryIdfSum: Record<string, number> = {};
+  for (const token of queryTokens) {
+    queryIdfSum[token] = computeIdf(token, entries.length, df);
+  }
+  const totalQueryIdf = Object.values(queryIdfSum).reduce((sum, v) => sum + v, 0);
+
   let best: { entry: FaqEntry; score: number } | null = null;
   for (const entry of entries) {
-    const qTokens = tokenize(entry.question);
-    let overlap = 0;
-    for (const t of queryTokens) if (qTokens.has(t)) overlap++;
-    const score = overlap / Math.max(queryTokens.size, qTokens.size);
+    const entryTokens = tokenize(entry.question);
+
+    // Sum IDF scores for tokens that match between query and entry
+    let matchedIdfSum = 0;
+    for (const queryToken of queryTokens) {
+      if (entryTokens.has(queryToken)) {
+        matchedIdfSum += queryIdfSum[queryToken];
+      }
+    }
+
+    // score = sum(idf(matched tokens)) / sum(idf(query tokens))
+    const score = totalQueryIdf > 0 ? matchedIdfSum / totalQueryIdf : 0;
     if (!best || score > best.score) best = { entry, score };
   }
   return best;
