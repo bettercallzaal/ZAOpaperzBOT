@@ -1,0 +1,35 @@
+{
+  "name": "zaopaperz-bot",
+  "version": "0.1.0",
+  "description": "ZAO Paperz - Discord FAQ bot answering 'what is The ZAO' questions, sourced live from thezao.xyz/what-is-the-zao. Installable across multiple servers.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node --import tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "register-commands": "tsx scripts/register-commands.ts",
+    "lint": "biome check src",
+    "format": "biome format --write src"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7",
+    "pino": "^9.5.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZAODEVZ/ZAOpaperzBOT.git"
+  }
+}

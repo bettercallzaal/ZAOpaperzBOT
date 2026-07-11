@@ -1,0 +1,26 @@
+[Unit]
+Description=ZAO Paperz - Discord FAQ bot (multi-server)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=zaopaperz
+Group=zaopaperz
+WorkingDirectory=/opt/zaopaperz
+EnvironmentFile=/opt/zaopaperz/.env
+ExecStart=/usr/bin/node --import tsx /opt/zaopaperz/src/index.ts
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+# Hardening - this bot never writes to disk (no recordings, no local state
+# beyond an in-memory FAQ cache), so the app dir can stay fully read-only.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
