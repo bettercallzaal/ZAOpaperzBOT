@@ -5,7 +5,7 @@ content at [thezao.xyz/what-is-the-zao](https://www.thezao.xyz/what-is-the-zao) 
 no hardcoded Q&A in this repo, on purpose. Designed to be installed across
 multiple Discord servers (global slash commands, not locked to one guild).
 
-**Repo:** `github.com/ZAODEVZ/ZAOpaperzBOT`
+**Repo:** `github.com/bettercallzaal/ZAOpaperzBOT`
 **Status:** v0.1 - built, not yet deployed (needs a real Discord bot token, see below)
 
 ## Why it reads live instead of hardcoding answers
