@@ -102,6 +102,20 @@ unknown".
 
 To run the dashboard locally: `cd dashboard && npm install && npm run dev`.
 
+## Papers RAG (foundation)
+
+Every ZAO paper (not just the `/what-is-the-zao` FAQ page) gets embedded into
+`public.paper_sections` in the Zuke Supabase project on a periodic reindex
+(every 6 hours). Sections are extracted directly from each paper's live HTML
+(`<section>` elements containing an `<h2>`) - not from `papers.json`'s
+`sections` field, which is unreliable (often `null`). Search happens through
+one Postgres function, `match_paper_sections`, callable by any consumer with
+a Supabase client - this repo doesn't yet call it from `/zao` (that's a
+follow-up), it just keeps the index current.
+
+Requires `OPENAI_API_KEY` in addition to the dashboard's `SUPABASE_URL`/
+`SUPABASE_SERVICE_ROLE_KEY` - all optional, the bot runs fine without them.
+
 ## Extending it
 
 - More commands: add a file under `src/commands/`, export `data` (a
