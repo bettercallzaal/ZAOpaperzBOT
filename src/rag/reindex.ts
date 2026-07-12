@@ -99,7 +99,11 @@ export async function runReindex(): Promise<void> {
   }
 
   for (const paper of papers) {
-    await reindexPaper(supabase, paper);
+    try {
+      await reindexPaper(supabase, paper);
+    } catch (err) {
+      logger.warn({ err, paperId: paper.id }, "Failed to reindex paper, continuing with next");
+    }
   }
 }
 
