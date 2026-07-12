@@ -113,8 +113,11 @@ one Postgres function, `match_paper_sections`, callable by any consumer with
 a Supabase client - this repo doesn't yet call it from `/zao` (that's a
 follow-up), it just keeps the index current.
 
-Requires `OPENAI_API_KEY` in addition to the dashboard's `SUPABASE_URL`/
-`SUPABASE_SERVICE_ROLE_KEY` - all optional, the bot runs fine without them.
+Requires `OPENAI_API_KEY` plus its own `RAG_SUPABASE_URL`/
+`RAG_SUPABASE_SERVICE_ROLE_KEY` - deliberately separate from the dashboard's
+`SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`, since these two features point at
+two different Supabase projects (cowork for the dashboard, Zuke for RAG). All
+optional, the bot runs fine without them.
 
 ## Extending it
 

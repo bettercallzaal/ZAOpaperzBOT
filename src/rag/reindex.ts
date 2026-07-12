@@ -18,11 +18,11 @@ let client: SupabaseClient | null | undefined;
 function getClient(): SupabaseClient | null {
   if (client !== undefined) return client;
   client =
-    config.supabaseUrl && config.supabaseServiceRoleKey
-      ? createClient(config.supabaseUrl, config.supabaseServiceRoleKey)
+    config.ragSupabaseUrl && config.ragSupabaseServiceRoleKey
+      ? createClient(config.ragSupabaseUrl, config.ragSupabaseServiceRoleKey)
       : null;
   if (!client) {
-    logger.warn("SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY not set - papers reindex disabled");
+    logger.warn("RAG_SUPABASE_URL/RAG_SUPABASE_SERVICE_ROLE_KEY not set - papers reindex disabled");
   }
   return client;
 }
