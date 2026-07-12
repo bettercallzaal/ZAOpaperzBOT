@@ -15,4 +15,5 @@ export const config = {
   logLevel: process.env.LOG_LEVEL || "info",
   supabaseUrl: process.env.SUPABASE_URL || undefined,
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || undefined,
+  openaiApiKey: process.env.OPENAI_API_KEY || undefined,
 };
