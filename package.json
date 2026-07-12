@@ -14,7 +14,7 @@
     "register-commands": "tsx scripts/register-commands.ts",
     "lint": "biome check src",
     "format": "biome format --write src",
-    "test": "node --import tsx --test 'src/**/*.test.ts'"
+    "test": "node --import tsx --test src/*.test.ts src/rag/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.109.0",
