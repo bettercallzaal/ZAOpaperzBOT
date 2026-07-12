@@ -33,10 +33,18 @@ thezao.xyz/papers/*.html (live pages, ZADODEVZ/ZAOcowork)
 Reindex job (periodic, runs on VPS 187.77.3.104 - same box ZAOpaperzBOT
 already runs on)
         |
-        +--> fetch public/papers.json for the current paper list + section IDs
+        +--> fetch public/papers.json for the current paper list + URLs
         +--> fetch each paper's live HTML page
-        +--> extract each section's text content (by the existing section
-        |     IDs already tracked in papers.json, e.g. "section-01")
+        +--> extract sections directly from the page markup: every <section>
+        |     element that contains an <h2> is a real content chunk (verified
+        |     2026-07-11 against 6 live pages - papers.json's own "sections"
+        |     array is NOT reliable: most papers have it as null, e.g.
+        |     wavewarz, and where present its ids like "section-01" don't
+        |     match any real DOM id anyway). Use the section's real id
+        |     attribute when present (what-is-the-zao.html has real
+        |     id="q-01" etc.), else a positionally-generated "section-N".
+        |     Sections with no <h2> (e.g. a draft-flag banner) are skipped -
+        |     they're page furniture, not content.
         +--> hash each section's content
         +--> for sections whose hash changed since last run: call OpenAI
         |     text-embedding-3-small, get a 1536-dim vector
