@@ -10,6 +10,7 @@ import { getFaq, findBestMatch } from "../faq.js";
 import { config } from "../config.js";
 import { logger } from "../logger.js";
 import { logCommandEvent } from "../status-reporter.js";
+import { queryPapers } from "../rag/query.js";
 
 const MATCH_THRESHOLD = 0.34;
 const ACCENT_COLOR = 0xf5a623;
@@ -76,6 +77,24 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  // Try semantic RAG search across all papers first.
+  const ragMatches = await queryPapers(question);
+  if (ragMatches.length > 0) {
+    const top = ragMatches[0];
+    logCommandEvent(question, true, top.similarity);
+    const description =
+      top.content.length > 4000 ? top.content.slice(0, 3997) + "…" : top.content;
+    const embed = new EmbedBuilder()
+      .setColor(ACCENT_COLOR)
+      .setTitle(top.title || "From the ZAO Papers")
+      .setDescription(description)
+      .setURL(top.url)
+      .setFooter({ text: `The ZAO Papers · ${top.paperId}` });
+    await interaction.editReply({ embeds: [embed] });
+    return;
+  }
+
+  // Fall back to FAQ keyword matching.
   const match = findBestMatch(faq.entries, question);
   const matched = !!match && match.score >= MATCH_THRESHOLD;
   logCommandEvent(question, matched, match?.score ?? null);
