@@ -1,5 +1,5 @@
-import { test, describe, beforeEach, mock } from "node:test";
 import assert from "node:assert/strict";
+import { beforeEach, describe, mock, test } from "node:test";
 
 // Stub config before imports that read it at module level.
 process.env.RAG_SUPABASE_URL = "https://example.supabase.co";

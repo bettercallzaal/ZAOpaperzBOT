@@ -1,16 +1,16 @@
 import {
-  SlashCommandBuilder,
-  EmbedBuilder,
   ActionRowBuilder,
-  StringSelectMenuBuilder,
   type ChatInputCommandInteraction,
+  EmbedBuilder,
+  SlashCommandBuilder,
+  StringSelectMenuBuilder,
   type StringSelectMenuInteraction,
 } from "discord.js";
-import { getFaq, findBestMatch } from "../faq.js";
 import { config } from "../config.js";
+import { findBestMatch, getFaq } from "../faq.js";
 import { logger } from "../logger.js";
-import { logCommandEvent } from "../status-reporter.js";
 import { queryPapers } from "../rag/query.js";
+import { logCommandEvent } from "../status-reporter.js";
 
 const MATCH_THRESHOLD = 0.34;
 const ACCENT_COLOR = 0xf5a623;
@@ -25,7 +25,9 @@ export const data = new SlashCommandBuilder()
       .setRequired(false),
   );
 
-function topicSelectRow(entries: { question: string }[]): ActionRowBuilder<StringSelectMenuBuilder> {
+function topicSelectRow(
+  entries: { question: string }[],
+): ActionRowBuilder<StringSelectMenuBuilder> {
   const menu = new StringSelectMenuBuilder()
     .setCustomId("zao_faq_topic")
     .setPlaceholder("Or pick a topic")
@@ -82,8 +84,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (ragMatches.length > 0) {
     const top = ragMatches[0];
     logCommandEvent(question, true, top.similarity);
-    const description =
-      top.content.length > 4000 ? top.content.slice(0, 3997) + "…" : top.content;
+    const description = top.content.length > 4000 ? top.content.slice(0, 3997) + "…" : top.content;
     const embed = new EmbedBuilder()
       .setColor(ACCENT_COLOR)
       .setTitle(top.title || "From the ZAO Papers")

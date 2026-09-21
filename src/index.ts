@@ -1,10 +1,10 @@
-import { Client, GatewayIntentBits, Events, type Interaction } from "discord.js";
-import { config } from "./config.js";
-import { logger } from "./logger.js";
+import { Client, Events, GatewayIntentBits, type Interaction } from "discord.js";
 import * as zaoCommand from "./commands/zao.js";
-import { startHeartbeatLoop } from "./status-reporter.js";
+import { config } from "./config.js";
 import { getFaqCacheAgeMinutes } from "./faq.js";
+import { logger } from "./logger.js";
 import { startReindexLoop } from "./rag/reindex.js";
+import { startHeartbeatLoop } from "./status-reporter.js";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -24,7 +24,9 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
   } catch (err) {
     logger.error({ err }, "Interaction handler failed");
     if (interaction.isRepliable() && !interaction.replied) {
-      await interaction.reply({ content: "Something went wrong. Try again in a moment.", ephemeral: true }).catch(() => {});
+      await interaction
+        .reply({ content: "Something went wrong. Try again in a moment.", ephemeral: true })
+        .catch(() => {});
     }
   }
 });

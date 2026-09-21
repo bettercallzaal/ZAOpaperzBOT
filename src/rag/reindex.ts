@@ -1,9 +1,9 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { type SupabaseClient, createClient } from "@supabase/supabase-js";
 import { config } from "../config.js";
 import { logger } from "../logger.js";
-import { extractSections } from "./extract-sections.js";
-import { findChangedSections, type ExistingSectionHash } from "./diff-sections.js";
+import { type ExistingSectionHash, findChangedSections } from "./diff-sections.js";
 import { embedText } from "./embeddings.js";
+import { extractSections } from "./extract-sections.js";
 
 const REINDEX_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const PAPERS_JSON_URL = "https://www.thezao.xyz/papers.json";
@@ -34,7 +34,10 @@ async function fetchPaperList(): Promise<PaperListEntry[]> {
   return data.papers.map((p) => ({ id: p.id, url: p.url }));
 }
 
-async function fetchExistingHashes(supabase: SupabaseClient, paperId: string): Promise<ExistingSectionHash[]> {
+async function fetchExistingHashes(
+  supabase: SupabaseClient,
+  paperId: string,
+): Promise<ExistingSectionHash[]> {
   const { data, error } = await supabase
     .from("paper_sections")
     .select("paper_id, section_id, content_hash")
@@ -60,7 +63,10 @@ async function reindexPaper(supabase: SupabaseClient, paper: PaperListEntry): Pr
   try {
     existingHashes = await fetchExistingHashes(supabase, paper.id);
   } catch (err) {
-    logger.warn({ err, paperId: paper.id }, "Failed to read existing hashes, skipping this paper this run");
+    logger.warn(
+      { err, paperId: paper.id },
+      "Failed to read existing hashes, skipping this paper this run",
+    );
     return;
   }
 
@@ -81,7 +87,10 @@ async function reindexPaper(supabase: SupabaseClient, paper: PaperListEntry): Pr
       });
       if (error) throw error;
     } catch (err) {
-      logger.warn({ err, paperId: paper.id, sectionId: section.sectionId }, "Failed to embed/upsert section, skipping");
+      logger.warn(
+        { err, paperId: paper.id, sectionId: section.sectionId },
+        "Failed to embed/upsert section, skipping",
+      );
     }
   }
 }

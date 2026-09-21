@@ -1,13 +1,16 @@
-import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { findBestMatch, getFaqCacheAgeMinutes, type FaqEntry } from "./faq.js";
+import { describe, test } from "node:test";
+import { type FaqEntry, findBestMatch, getFaqCacheAgeMinutes } from "./faq.js";
 
 const ENTRIES: FaqEntry[] = [
   { question: "What is The ZAO?", answer: "A decentralized impact network." },
   { question: "What does ZAO stand for?", answer: "ZTalent Artist Organization." },
   { question: "Who founded The ZAO?", answer: "Zaal Panthaki." },
   { question: "Is The ZAO a record label?", answer: "No, not a record label." },
-  { question: "What blockchain does The ZAO use?", answer: "Optimism, Base, and Solana depending on the lane." },
+  {
+    question: "What blockchain does The ZAO use?",
+    answer: "Optimism, Base, and Solana depending on the lane.",
+  },
 ];
 
 describe("findBestMatch", () => {
@@ -42,7 +45,10 @@ describe("findBestMatch", () => {
     // It will always return *a* best-of-the-worst match - the caller's
     // MATCH_THRESHOLD (in commands/zao.ts) is what decides to reject it.
     // This test just guards that the score stays low, not that it's null.
-    assert.ok(result!.score < 0.34, `expected a low score for an unrelated query, got ${result?.score}`);
+    assert.ok(
+      result!.score < 0.34,
+      `expected a low score for an unrelated query, got ${result?.score}`,
+    );
   });
 
   test("empty entries list never throws", () => {
