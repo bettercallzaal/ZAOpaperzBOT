@@ -1,6 +1,6 @@
-import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { buildHeartbeatPayload, buildCommandEventPayload } from "./status-reporter.js";
+import { describe, test } from "node:test";
+import { buildCommandEventPayload, buildHeartbeatPayload } from "./status-reporter.js";
 
 describe("buildHeartbeatPayload", () => {
   test("includes bot name, status, and meta fields", () => {

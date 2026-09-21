@@ -1,6 +1,6 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { logger } from "./logger.js";
+import { type SupabaseClient, createClient } from "@supabase/supabase-js";
 import { config } from "./config.js";
+import { logger } from "./logger.js";
 
 const BOT_NAME = "zaopaperz";
 const MAX_MESSAGE_LENGTH = 200;
@@ -40,7 +40,8 @@ export function buildCommandEventPayload(
   return {
     bot: BOT_NAME,
     kind: "command",
-    message: question.length > MAX_MESSAGE_LENGTH ? question.slice(0, MAX_MESSAGE_LENGTH) : question,
+    message:
+      question.length > MAX_MESSAGE_LENGTH ? question.slice(0, MAX_MESSAGE_LENGTH) : question,
     ts: new Date().toISOString(),
     meta: { matched, score },
   };
@@ -66,7 +67,9 @@ function getClient(): SupabaseClient | null {
 function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Supabase call timed out")), ms)),
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Supabase call timed out")), ms),
+    ),
   ]);
 }
 
@@ -96,7 +99,9 @@ export function logCommandEvent(question: string, matched: boolean, score: numbe
   const supabase = getClient();
   if (!supabase) return;
   const payload = buildCommandEventPayload(question, matched, score);
-  void withTimeout(supabase.from("bot_events").insert(payload), SUPABASE_TIMEOUT_MS).catch((err) => {
-    logger.warn({ err }, "Command event write failed");
-  });
+  void withTimeout(supabase.from("bot_events").insert(payload), SUPABASE_TIMEOUT_MS).catch(
+    (err) => {
+      logger.warn({ err }, "Command event write failed");
+    },
+  );
 }

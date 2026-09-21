@@ -1,6 +1,6 @@
-import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { hashContent, findChangedSections } from "./diff-sections.js";
+import { describe, test } from "node:test";
+import { findChangedSections, hashContent } from "./diff-sections.js";
 import type { ExtractedSection } from "./extract-sections.js";
 
 describe("hashContent", () => {
