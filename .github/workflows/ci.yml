@@ -1,0 +1,36 @@
+name: CI
+
+# Runs on every PR and on main, so a red merge is visible on main too.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: typecheck and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # src/config.ts throws at import without these. Placeholders, not
+      # credentials: no test talks to Discord.
+      DISCORD_BOT_TOKEN: ci-placeholder
+      DISCORD_APP_ID: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: typecheck
+        run: npm run build
+      - name: tests
+        run: npm test
